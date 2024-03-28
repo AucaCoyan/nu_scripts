@@ -30,14 +30,19 @@ def "nu-complete topics" [] {
 }
 
 def myfunc [] {
-  ^gcloud topic --help | to text | lines | skip 1 | each {|$it| str replace --regex --multiline --all '(gcloud[\s\S]*(?=TOPICS))' '' }
+  ^gcloud topic --help | to text | str replace --regex --multiline --all '(NAME[\s\S]*(?=TOPICS))' '' | lines | skip 2 | filter { str starts-with "     " }
   ^gcloud topic --help | lines | str replace --regex --multiline '\S+\K.*' ''
-   | str replace --regex --all --multiline '(\w[\s\S]*(?=TOPICS))' '' 
     ^gcloud topic --help | lines | filter { str starts-with "     " }
      | skip 1 | parse "{value}: {description}" | str trim
 }
 
-export extern "gcloud components" []
+def "nu-complete components" [] {
+    gcloud components list | lines | skip 5 | drop 1 | parse "|{status}|{description}|{value}|{version}|" | select value description
+}
+
+export extern "gcloud components install" [
+    component: string@"nu-complete components"
+]
 
 # GCP alpha commands
 export extern "gcloud alpha" [...args]
@@ -52,3 +57,4 @@ def "nu-complete verbosity" [] {
 def "nu-complete formats" [] {
     ['config', 'csv', 'default', 'diff', 'disable', 'flattened', 'get', 'json', 'list', 'multi', 'none', 'object', 'table', 'text', 'value', 'yaml' ]
 }
+
