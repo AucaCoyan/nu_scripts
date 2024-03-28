@@ -37,7 +37,7 @@ def myfunc [] {
 }
 
 def "nu-complete components" [] {
-    gcloud components list | lines | skip 5 | drop 1 | parse "|{status}|{description}|{value}|{version}|" | select value description
+    gcloud components list --format json | from json | select id name | rename value description
 }
 
 export extern "gcloud components install" [
